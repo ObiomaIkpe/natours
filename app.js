@@ -1,0 +1,74 @@
+const express = require('express');
+const app = express();
+require('dotenv').config()
+require('express-async-errors');
+const morgan = require('morgan')
+const errorHandlerMiddleware = require('./middleware/generalErrorHandler');
+const notFoundMiddleware = require('./middleware/notFoundMiddleware')
+const {customAPIError, notFoundError} = require('./errors')
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+//const hpp = require('hpp');
+
+
+
+app.use(helmet());
+
+
+if (process.env.NODE_ENV === 'development'){
+    app.use(morgan('dev')) 
+}
+app.use(express.json())
+
+app.use(mongoSanitize());
+
+//data sanitization
+//app.use(hpp({
+//     whitelist: [
+//         'duration', 'ratingsQuantity', 'ratingsAverage', 'maxGroupSize', 'difficulty', 'price']
+// }))
+
+
+app.use(xss());
+//dummy middleware to test functionality
+app.use((req, res, next) => {
+
+    req.requestTime = new Date().toISOString();
+    console.log(req.requestTime)
+    //console.log(req.headers)
+    //console.log('hello from the middleware!')
+    next()
+})
+
+const limiter = rateLimit({
+    max: 100,
+    windowMs: 60 * 60 *60 * 1000,
+    message: 'too many requests from this IP, please try again later'
+})
+
+
+app.use('/api', limiter);
+
+app.use('/api/v1/tours', tourRouter)
+app.use('/api/v1/users', userRouter)
+
+app.all('*', (req, res, next) => {
+    // const err = new Error(`cannot find ${req.originalUrl} on this server`);
+    // err.status = 'fail',
+    // err.statusCode(404)
+    // next(err);
+
+    throw new notFoundError(`cannot find ${req.originalUrl} on this server` )
+
+})
+
+
+app.use(notFoundMiddleware);
+app.use (errorHandlerMiddleware);
+
+//exporting the module
+module.exports = app;
