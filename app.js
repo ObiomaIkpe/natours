@@ -1,5 +1,5 @@
 const express = require('express');
-const app = express();
+const path = require('path')
 require('dotenv').config()
 require('express-async-errors');
 const morgan = require('morgan')
@@ -14,9 +14,18 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 //const hpp = require('hpp');
 
+const app = express();
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname ,'views'))
+
+app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(helmet());
+
+app.get('/', (req, res) => {
+    res.status(200).render('base')
+})
 
 
 if (process.env.NODE_ENV === 'development'){
