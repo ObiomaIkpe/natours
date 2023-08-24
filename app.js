@@ -8,6 +8,7 @@ const notFoundMiddleware = require('./middleware/notFoundMiddleware')
 const {customAPIError, notFoundError} = require('./errors')
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -22,10 +23,6 @@ app.set('views', path.join(__dirname ,'views'))
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(helmet());
-
-app.get('/', (req, res) => {
-    res.status(200).render('base')
-})
 
 
 if (process.env.NODE_ENV === 'development'){
@@ -62,6 +59,8 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
+
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
 

@@ -3,12 +3,14 @@ const User =  require('../models/usersModel')
 const {StatusCodes} = require('http-status-codes')
 const {badRequestError, unauthenticatedError, notFoundError, customAPIError} = require('../errors')
 const jwt = require('jsonwebtoken')
+const { promisify } = require('util');
 const sendEmail = require('../utils/email')
 
 
 
+
 const signToken = userId => {
-    return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN
     });
   };
@@ -83,40 +85,64 @@ const protect = async (req, res, next) => {
     }
 
    //console.log(token)
+   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+   // 3) Check if user still exists
+   const currentUser = await User.findById(decoded.id);
+   if (!currentUser) {
+     return next(
+       new badRequestError(
+         'The user belonging to this token does no longer exist.',
+         401
+       )
+     );
+   }
+ 
+   // 4) Check if user changed password after the token was issued
+   if (currentUser.changedPasswordAfter(decoded.iat)) {
+     return next(
+       new badRequestError('User recently changed password! Please log in again.', 401)
+     );
+   }
+ 
+   // GRANT ACCESS TO PROTECTED ROUTE
+   req.user = currentUser;
+   next();
+ };
+ 
 
 
-    let payload;
-     //verify if the token is valid
-    try{
-         payload = jwt.verify(token, process.env.JWT_SECRET)
-        //attach the user to job routes
+//     let payload;
+//      //verify if the token is valid
+//     try{
+//          payload = jwt.verify(token, process.env.JWT_SECRET)
+//         //attach the user to job routes
         
-        console.log(payload)
-         //req.user = {userId:payload.userId, name:payload.name}
-    }catch(error){
-        console.log(error)
-    }    
-    //check if user exists
+//         console.log(payload)
+//          //req.user = {userId:payload.userId, name:payload.name}
+//     }catch(error){
+//         console.log(error)
+//     }    
+//     //check if user exists
 
-    const currentUser = await User.findById(payload.userId)
-    if(!currentUser){
-        throw new notFoundError('no user with this token.')
-    }
+//     const currentUser = await User.findById(payload.userId)
+//     if(!currentUser){
+//         throw new notFoundError('no user with this token.')
+//     }
 
-    //check if user changed password after token was issued
-    if (currentUser.changedPasswordAfter(payload.iat)){
-        throw new unauthenticatedError('Password was recently changed, please log in again')
-    }
-    
+//     //check if user changed password after token was issued
+//     if (currentUser.changedPasswordAfter(payload.iat)){
+//         throw new unauthenticatedError('Password was recently changed, please log in again')
+//     }    
 
-    //Grant access to protected route
-    //req.user = {userId:payload.userId, name:payload.name}
-    req.user = currentUser
-    //console.log(currentUser)
+//     //Grant access to protected route
+//     //req.user = {userId:payload.userId, name:payload.name}
+//     req.user = currentUser
+//     //console.log(currentUser)
 
-    next()
+//     next()
 
-}
+// }
 
 
 //restricting certain routes

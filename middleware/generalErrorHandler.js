@@ -135,6 +135,10 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.msg = 'Invalid auth token!',
     customError.statusCode = StatusCodes.UNAUTHORIZED
   }
+  if(err.name === 'tokenExpiredError'){
+    customError.msg = 'token expired',
+    customError.statusCode = err.code
+  }
 
   console.log(err)
   return res.status(customError.statusCode).json({ msg: customError.msg })

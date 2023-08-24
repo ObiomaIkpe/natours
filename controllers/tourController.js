@@ -34,7 +34,7 @@ const getAllTours = async(req, res)=> {
 
 
 const getTour = async (req, res) => {    
-        const tour = await Tour.findById(req.params.id)        
+        const tour = await Tour.findById(req.params.id)       
     if (!tour){
         throw new notFoundError('no tour found')
     }
@@ -54,8 +54,6 @@ const createTour = async(req, res) => {
     if (err){
         throw new badRequestError('unable to create tour')
     }
-        res.status(500).json({msg:error})
-       //console.log(error) 
 }
 
 

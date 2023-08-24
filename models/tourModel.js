@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+const user = require('../models/usersModel')
 
 const tourSchema = new mongoose.Schema({
     name:{
@@ -20,6 +21,42 @@ const tourSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+
+    startLocation: {
+        //mongdb uses geoJSON in order to specify geospatial data
+        type:{
+            type: String,
+            default: 'Point', //polygon, line
+            enum: ['Point']
+        },
+        coordinates:
+            [Number],
+            address: String,
+            description: String
+        },
+        locations: [
+            {
+                type: {
+                    type: String,
+                    default: 'Point',
+                    enum: ['Point']
+                },
+                coordinates: [Number],
+                address: String,
+                description: String,
+                day: Number
+            }
+        ],
+        guides: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: 'user',
+
+
+            }
+        ],
+    
+
     rating:{
         type: Number,       
         default: 4.5,
@@ -94,10 +131,25 @@ tourSchema.virtual('daysTowWeeks').get(function(){
     return this.duration / 7;
 });
 
+
+//embedding
+// tourSchema.pre('save', async function(next){
+//     const guidesPromises = this.guides.map(async id => await user.findById(id))
+//     this.guides = await Promise.all(guidesPromises)
+//     next()
+// })
+
 tourSchema.pre('save', function(next) {
 this.slug = slugify(this.name, {lower: true});
 next();
 })
+
+tourSchema.pre(/^find/, function(next){
+    this.populate({
+    path: 'guides',
+select: '-__v -passwordChangedAt'})
+next()
+    })
 
 tourSchema.post('save', function(doc, next){
     //console.log(doc)

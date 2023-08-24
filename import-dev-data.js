@@ -5,7 +5,7 @@ const connectDB = require('./connectDB/connect');
 const mongoose = require('mongoose');
 const Tour =  require('./models/tourModel');
 const { readFileSync } = require('fs');
-const tours = JSON.parse(readFileSync('json-simple.json', 'utf-8'));
+const tours = JSON.parse(readFileSync('tours.json', 'utf-8'));
 
 
 const start = async () => {
