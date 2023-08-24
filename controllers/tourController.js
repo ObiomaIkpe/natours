@@ -14,6 +14,14 @@ const aliasTopTours = (req, res, next) => {
 }
 
 const getAllTours = async(req, res)=> {
+
+//    const tourss = await Tour.find()
+//    res.status(200).json({status: "success",
+//     results: tourss.length,
+//     data: {
+//         tours: tourss
+//     }
+// })
     
         
         const features = new apiFeatures(Tour.find(), req.query).filter().sort().limitFields().paginate();
@@ -34,7 +42,9 @@ const getAllTours = async(req, res)=> {
 
 
 const getTour = async (req, res) => {    
-        const tour = await Tour.findById(req.params.id)       
+    // Tour.findOne({ _id: req,params.id})
+        const tour = await Tour.findById(req.params.id) //'id' must match sith the variable in the routes
+
     if (!tour){
         throw new notFoundError('no tour found')
     }
@@ -56,7 +66,6 @@ const createTour = async(req, res) => {
     }
 }
 
-
 const updateTour = async (req, res, next) => {
     
         const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
@@ -64,7 +73,7 @@ const updateTour = async (req, res, next) => {
             runValidators: true
         });
 
-        if (!updateTour){
+        if (!tour){
             throw new badRequestError(`No tour with id:  ${req.params.id} `)
         }
 
@@ -75,11 +84,10 @@ const updateTour = async (req, res, next) => {
                 tour: tour
             }
         })
-    
 }
 
 const deleteTour = async (req, res, next) => {
-    const tour = await Tour.findByIdAndDelete(req.param.id);  
+     await Tour.findByIdAndDelete(req.params.id);  
         res.status(204).json({
         data: null
     })    
