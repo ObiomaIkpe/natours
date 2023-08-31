@@ -10,7 +10,7 @@ const sendEmail = require('../utils/email')
 
 
 const signToken = userId => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+    return jwt.sign({ userId }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN
     });
   };
@@ -46,8 +46,8 @@ const signUp = async (req, res) => {
     const newUser = await User.create({
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm        
+        password: req.body.password
+        // passwordConfirm: req.body.passwordConfirm        
         //passwordChangedAt: req.body.passwordChangedAt
     });
     createSendToken(newUser, StatusCodes.CREATED, res);
@@ -81,14 +81,14 @@ const protect = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1]
     if(!token){
-        throw new unauthenticatedError('invalid auth token')
+        throw new unauthenticatedError('Please login to get access!')
     }
 
    //console.log(token)
    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
    // 3) Check if user still exists
-   const currentUser = await User.findById(decoded.id);
+   const currentUser = await User.findById(decoded.userId);//(decoded.id)
    if (!currentUser) {
      return next(
        new badRequestError(
@@ -112,39 +112,6 @@ const protect = async (req, res, next) => {
  
 
 
-//     let payload;
-//      //verify if the token is valid
-//     try{
-//          payload = jwt.verify(token, process.env.JWT_SECRET)
-//         //attach the user to job routes
-        
-//         console.log(payload)
-//          //req.user = {userId:payload.userId, name:payload.name}
-//     }catch(error){
-//         console.log(error)
-//     }    
-//     //check if user exists
-
-//     const currentUser = await User.findById(payload.userId)
-//     if(!currentUser){
-//         throw new notFoundError('no user with this token.')
-//     }
-
-//     //check if user changed password after token was issued
-//     if (currentUser.changedPasswordAfter(payload.iat)){
-//         throw new unauthenticatedError('Password was recently changed, please log in again')
-//     }    
-
-//     //Grant access to protected route
-//     //req.user = {userId:payload.userId, name:payload.name}
-//     req.user = currentUser
-//     //console.log(currentUser)
-
-//     next()
-
-// }
-
-
 //restricting certain routes
 const restrictTo = (...roles) => {
     return (req, res, next) => {
@@ -154,21 +121,18 @@ const restrictTo = (...roles) => {
         }
         next()
     }
-
 }
 
 const forgotPassword = async (req, res, next) => {
     //1) get user based on POSTed email
     
-    const user = await User.findOne({email: req.body.email})
-
-
+    const user = await User.findOne({email: req.body.email});
 
     if(!user){
         throw new notFoundError('No user found with that email')
     }
 
-    //generate random reset token
+    //2)generate random reset token
     const resestToken = user.createPasswordResetToken();
     await user.save({validateBeforeSave: false});
 
@@ -215,7 +179,8 @@ const resetPassword = async (req, res) => {
 
 
     user.password = req.body.password;
-   user.passwordConfirm = req.body.passwordConfirm;
+   //user.passwordConfirm = req.body.passwordConfirm;
+
    //3) update the changedPasswordAt property for the current user
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
@@ -230,22 +195,21 @@ const resetPassword = async (req, res) => {
 const updatePassword = async (req, res) => {
     //get user from collection
         
-    const user = await User.findById(req.user.id).select('+password')
+    const user = await User.findById(req.currentUser.id).select('+password') //(req.user.id)
     console.log(user)
     //check if the posted password is correct
     
-    // if(!(await user.comparePassword(req.body.passwordCurrent, user.password))) 
-    // {
-    //     throw new badRequestError('your current password is wrong')   
-    //  }    //if so, update password
+    if(!(await user.comparePassword(req.body.password, user.password))) 
+    
+        throw new badRequestError('your current password is wrong')   
+        //if so, update password
 
     user.password = req.body.password;
-    user.password = req.body.passwordConfirm;
+   // user.password = req.body.passwordConfirm;
+
     await user.save();   
     //log user in, send JWT
-    createSendToken(newUser, StatusCodes.OK, res);
-    
-    
+    createSendToken(user, StatusCodes.OK, res);     
     }
 
        
