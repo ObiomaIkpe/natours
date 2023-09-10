@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
-const user = require('../models/usersModel')
+//const user = require('../models/usersModel');
+const Review = require('./reviewModel');
 
 const tourSchema = new mongoose.Schema({
     name:{
@@ -33,7 +34,7 @@ const tourSchema = new mongoose.Schema({
             [Number],
             address: String,
             description: String
-        },
+    },
         locations: [
             {
                 type: {
@@ -46,15 +47,26 @@ const tourSchema = new mongoose.Schema({
                 description: String,
                 day: Number
             }
-        ],
-        guides: [
-            {
-                type: mongoose.Schema.ObjectId,
-                ref: 'user',
+        ]
+    ,
+    //addingGuidesByEmbedding: Array,
+    //comment: 'this is how you connect two different documents  by embedding',
 
-
-            }
-        ],
+    guides: [
+        //using the reference method
+       { 
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+       }
+    ],
+           
+    //   reviews:[
+    //     {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: "Review",
+    //         //this it how it would have been done wif it was child referencing, in this case, tours referencing reviews. Instead, we implement virtual populate!
+    //   }
+    //  ] , 
     
 
     rating:{
@@ -122,22 +134,40 @@ const tourSchema = new mongoose.Schema({
         select: false
     },
     startDates: [Date]
-}, {
+}, 
+{
     toJSON: {virtuals: true},
     toObject: {virtuals: true}
-})
+}
+);
 
 tourSchema.virtual('daysTowWeeks').get(function(){
     return this.duration / 7;
 });
 
 
+//virtual populate
+tourSchema.virtual('reviews',   {
+    ref: 'Review', 
+    foreignField: 'tour',// this is the name of the field in the other model, so basically, in the review model where the reference to the current model is stored.
+    localField: '_id'//where the referenced id is actually stored in "this" model.
+    
+})
+
 //embedding
 // tourSchema.pre('save', async function(next){
-//     const guidesPromises = this.guides.map(async id => await user.findById(id))
-//     this.guides = await Promise.all(guidesPromises)
-//     next()
+//     const guidesPromises =  this.guides.map(await id => user.findById(id));
+//     this.guides = await Promise.all(guidesPromises);
+//     next();
 // })
+
+tourSchema.pre('/^find/', function(next){
+    this.populate({
+        path: 'guides',
+select: '-__v -passwordChangedAt'});
+
+    next();
+})
 
 tourSchema.pre('save', function(next) {
 this.slug = slugify(this.name, {lower: true});

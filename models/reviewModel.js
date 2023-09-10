@@ -1,9 +1,10 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Tour = require('./tourModel')
 
 const reviewSchema = new mongoose.Schema({
     review: {
         type: String,
-        required: [True, 'review cannot be empty']
+        required: [true, 'review cannot be empty']
     },
     rating: {
         type: Number,
@@ -14,23 +15,35 @@ const reviewSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
+    //creating references
     tour: {
         type: mongoose.Schema.ObjectId,
         ref: 'Tour',
-        required: [True, 'review must belong to a document!']
+        required: [true, 'review must belong to a tour document!']
+        //each rreview in a tour must know exactly what tour it belongs to.
     },
     user: {
-        type: mongoose.Schema,ObjectId,
+        type: mongoose.Schema.ObjectId,
         ref: 'User',
-        required: [True, 'review must belong to a user.']
+        required: [true, 'review must belong to a user.']
     }
-
+    //end of references.
 },
 {
     toJSON: {virtuals: true},
     toObject: {virtuals: true}
+});
+
+reviewSchema.pre('/^find/', function(next){
+    this.populate({
+        path: 'user',
+        select: 'name photo'
+    })
+    next();
 })
 
-const review = mongoose.model('Review', reviewSchema)
-module.exports = review
+
+
+const Review = mongoose.model('Review', reviewSchema)
+module.exports = Review
 

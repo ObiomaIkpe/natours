@@ -9,6 +9,7 @@ const {customAPIError, notFoundError} = require('./errors')
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const viewRouter = require('./routes/viewRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -61,8 +62,9 @@ app.use('/api', limiter);
 
 
 app.use('/', viewRouter);
-app.use('/api/v1/tours', tourRouter)
-app.use('/api/v1/users', userRouter)
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
     // const err = new Error(`cannot find ${req.originalUrl} on this server`);

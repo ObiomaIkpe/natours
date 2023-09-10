@@ -40,17 +40,17 @@ const userSchema = new mongoose.Schema({
         minLength: 8,
         select: false
     },
-    passwordConfirm: {
-        type: String,
-        required: [true, 'please confirm your password'],
-        validate: {
-            //this works only when we save the object
-            validator: function(el){
-                return el === this.password;
-            },
-            message: 'passwords are not the same!'
-        }
-    },
+    // passwordConfirm: {
+    //     type: String,
+    //     required: [true, 'please confirm your password'],
+    //     validate: {
+    //         //this works only when we save the object
+    //         validator: function(el){
+    //             return el === this.password;
+    //         },
+    //         message: 'passwords are not the same!'
+    //     }
+    
 
      passwordChangedAt: Date,
     passwordResetToken: String,
@@ -66,10 +66,12 @@ userSchema.methods.comparePassword = async function (candidatePassword, userPass
 
 userSchema.pre('save', async function(next){
     if(!this.isModified('password')) return next();
-
-    if(this.password) {const salt = await bcrypt.genSalt(10);
+    //only runs this function if the password was modified.
+    if(this.password) {
+        
+    const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt)
-    this.passwordConfirm = undefined
+    // this.passwordConfirm = undefined
     }
     next()
 })

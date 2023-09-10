@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 dotenv.config({path: './env'})
 const app = require('./app');
 const connectDB = require('./connectDB/connect');
-const port = process.env.PORT || 7000;
+const port = process.env.PORT || 9000;
 
 //start the server
 const start = async () => {

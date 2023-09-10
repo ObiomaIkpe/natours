@@ -2,8 +2,7 @@ const Tour = require('../models/tourModel')
 const fs = require('fs')
 const tours = JSON.parse(fs.readFileSync('/home/aigo/Desktop/natours/json-simple.json'));
 const apiFeatures = require('../utils/apiFeatures');
-
-const { StatusCodes } = require('http-status-codes')
+const handleFactory = require('./handleFactory');
 const { notFoundError, badRequestError } = require('../errors')
 
 const aliasTopTours = (req, res, next) => {
@@ -40,10 +39,11 @@ const getAllTours = async(req, res)=> {
             })    
  }
 
-
 const getTour = async (req, res) => {    
     // Tour.findOne({ _id: req,params.id})
-        const tour = await Tour.findById(req.params.id) //'id' must match sith the variable in the routes
+        const tour = await Tour.findById(req.params.id)//.populate({
+            //path:'guides', select: '-__v -passwordChangedAt'}); //populate(reviews)
+        //'id' must match with the variable in the routes
 
     if (!tour){
         throw new notFoundError('no tour found')
@@ -58,11 +58,12 @@ const getTour = async (req, res) => {
 
 const createTour = async(req, res) => {
     
-        const newTour = await Tour.create(req.body)
+        try{
+            const newTour = await Tour.create(req.body)
     res.status(StatusCodes.CREATED).json({newTour})
-    
-    if (err){
-        throw new badRequestError('unable to create tour')
+}
+    catch(err){
+        console.log(err)
     }
 }
 
@@ -86,12 +87,14 @@ const updateTour = async (req, res, next) => {
         })
 }
 
-const deleteTour = async (req, res, next) => {
-     await Tour.findByIdAndDelete(req.params.id);  
-        res.status(204).json({
-        data: null
-    })    
-}
+
+ const deleteTour = handleFactory.deleteOne(Tour);
+ // const deleteTour = async (req, res, next) => {
+//      await Tour.findByIdAndDelete(req.params.id);  
+//         res.status(204).json({
+//         data: null
+//     })    
+// }
 
 const getTourStats = async (req, res) => {
     try{

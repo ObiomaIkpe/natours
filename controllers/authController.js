@@ -9,8 +9,8 @@ const sendEmail = require('../utils/email')
 
 
 
-const signToken = userId => {
-    return jwt.sign({ userId }, process.env.JWT_SECRET, {
+const signToken = id => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN
     });
   };
@@ -88,7 +88,7 @@ const protect = async (req, res, next) => {
    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
    // 3) Check if user still exists
-   const currentUser = await User.findById(decoded.userId);//(decoded.id)
+   const currentUser = await User.findById(decoded.id);//(decoded.userId)
    if (!currentUser) {
      return next(
        new badRequestError(
