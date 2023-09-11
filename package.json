@@ -23,6 +23,7 @@
     "http-status-codes": "^2.2.0",
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.0",
+    "mapbox-gl": "^2.15.0",
     "mongoose": "^7.2.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.3",
