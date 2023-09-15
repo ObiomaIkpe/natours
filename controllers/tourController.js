@@ -3,7 +3,8 @@ const fs = require('fs')
 const tours = JSON.parse(fs.readFileSync('/home/aigo/Desktop/natours/json-simple.json'));
 const apiFeatures = require('../utils/apiFeatures');
 const handleFactory = require('./handleFactory');
-const { notFoundError, badRequestError } = require('../errors')
+const customAPIError = require('../errors/customAPIError');
+const  { StatusCodes }= require('http-status-codes');
 
 const aliasTopTours = (req, res, next) => {
     req.query.limit = '5';
@@ -28,7 +29,7 @@ const getAllTours = async(req, res)=> {
         const tours = await features.query;
 
         if (!tours){
-            throw new customAPIError.notFoundError('no tour found')
+            throw new customAPIError('no tour found', StatusCodes.NOT_FOUND)
         }
 
         res.status(StatusCodes.OK).json({
@@ -46,7 +47,7 @@ const getTour = async (req, res) => {
         //'id' must match with the variable in the routes
 
     if (!tour){
-        throw new notFoundError('no tour found')
+        throw new customAPI('no tour found with that ID', StatusCodes.NOT_FOUND)
     }
 
     res.status(StatusCodes.OK).json({
@@ -75,7 +76,7 @@ const updateTour = async (req, res, next) => {
         });
 
         if (!tour){
-            throw new badRequestError(`No tour with id:  ${req.params.id} `)
+            throw new customAPIError(`No tour with id:  ${req.params.id} `, StatusCodes.NOT_FOUND)
         }
 
 
@@ -128,7 +129,7 @@ const getTourStats = async (req, res) => {
         })
     }
     catch(error){
-        res.status(404).json({
+        res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
             status: 'fail',
             message: error
         })
@@ -183,7 +184,7 @@ const getMonthlyPlan = async (req, res) => {
         })
         
     } catch (error) {
-        res.status(404).json({
+        res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
             status: 'fail',
             message: error
         })

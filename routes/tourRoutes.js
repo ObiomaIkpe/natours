@@ -8,6 +8,8 @@ const reviewRouter = require('../routes/reviewRoutes');
 
 router.use('/:tourId/reviews', reviewRouter);
 router.route('/').post(authController.protect, tourController.createTour)
+router.route('/').get(authController.protect, tourController.getAllTours)
+
 router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.getAllTours)
 router.route('/getTourStats').get(tourController.getTourStats)
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)

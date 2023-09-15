@@ -1,7 +1,10 @@
 console.log('hello from the client side!')
 
 const locations = JSON.parse(document.getElementById('map').dataset.locations)
-console.log(locations)
+
+export const displayMap = (locations) => {
+
+
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWlnbzI0NyIsImEiOiJjbG1lNTlleGkxdnJuM2d0ZnhqNnpvZGRtIn0.TlWzNECzx8Yjl6k8TBxlOQ';
 const map = new mapboxgl.Map({
@@ -48,6 +51,7 @@ map.fitBounds(bounds,  {
         right: 100
     }
 });
+}
 
 
 //secret=sk.eyJ1IjoiYWlnbzI0NyIsImEiOiJjbG1lNW54YnUxczhvM2V0Y3BuOWpnODlmIn0.J_MXrfadNVXWP2mpcLn0JQ

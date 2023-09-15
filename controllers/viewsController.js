@@ -29,3 +29,9 @@ exports.getLoginForm = async(req, res) => {
     title: 'Login'
  }
 }
+
+exports.signUp = async(req, res) => {
+    res.status(201).render('sign up'), {
+        title: 'sign Up'
+    }
+}

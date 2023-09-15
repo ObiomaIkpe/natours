@@ -1,5 +1,5 @@
 const User = require('../models/usersModel')
-const { badRequestError } = require('../errors')
+const customAPIError = require('../errors/customAPIError');
 const { StatusCodes} = require('http-status-codes')
 
 
@@ -15,7 +15,7 @@ const getAllUsers = async (req,res) => {
 
 const updateMe = async (req, res, next) => {
     if(req.body.password){
-        throw new badRequestError("this route is not for password updates")
+        throw new customAPIError("this route is not for password updates", StatusCodes.FORBIDDEN)
     }
 
     const filterObj = (obj, ...allowedFields) => {
@@ -38,7 +38,7 @@ const updateMe = async (req, res, next) => {
 
     const updateUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {new: true, runValidators: true})
 
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
     
         status: 'success',
         data: updateUser
@@ -50,11 +50,11 @@ const updateMe = async (req, res, next) => {
     
 
 const createUser = (req, res) => {
-    res.status(201).send('create user')
+    res.status(StatusCodes.CREATED).send('create user')
 }
 
 const getSingleUser = (req, res) => {
-    res.status(200).send('get single user')
+    res.status(StatusCodes.OK).send('get single user')
 }
 
 const updateUser = (req,res) => {

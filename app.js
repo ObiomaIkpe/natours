@@ -3,13 +3,13 @@ const path = require('path')
 require('dotenv').config()
 require('express-async-errors');
 const morgan = require('morgan')
-const errorHandlerMiddleware = require('./middleware/generalErrorHandler');
-const notFoundMiddleware = require('./middleware/notFoundMiddleware')
-const {customAPIError, notFoundError} = require('./errors')
+const errorHandlerMiddleware = require('./controllers/generalErrorHandler');
+const customAPIError = require('./errors/customAPIError')
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const cookieParser = require('cookie-parser')
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -25,11 +25,12 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 //app.use(helmet());
 
-
+//middleware
 if (process.env.NODE_ENV === 'development'){
     app.use(morgan('dev')) 
 }
 app.use(express.json())
+app.use(cookieParser())
 
 app.use(mongoSanitize());
 
@@ -47,6 +48,7 @@ app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
     console.log(req.requestTime)
     //console.log(req.headers)
+    console.log(req.cookies)
     //console.log('hello from the middleware!')
     next()
 })
@@ -72,12 +74,12 @@ app.all('*', (req, res, next) => {
     // err.statusCode(404)
     // next(err);
 
-    throw new notFoundError(`cannot find ${req.originalUrl} on this server` )
+    throw new customAPIError(`cannot find ${req.originalUrl} on this server` )
 
 })
 
 
-app.use(notFoundMiddleware);
+
 app.use (errorHandlerMiddleware);
 
 //exporting the module

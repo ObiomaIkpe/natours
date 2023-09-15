@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const User =  require('../models/usersModel')
 const {StatusCodes} = require('http-status-codes')
-const {badRequestError, unauthenticatedError, notFoundError, customAPIError} = require('../errors')
+const customAPIError = require('../errors/customAPIError')
 const jwt = require('jsonwebtoken')
 const { promisify } = require('util');
 const sendEmail = require('../utils/email')
@@ -55,21 +55,29 @@ const signUp = async (req, res) => {
  }
 
 const login = async (req, res) => {
-   const {email, password} = req.body
+   const {email, password} = req.body;
 
     //1) check if email and password exists in the user's input
     if (!email || !password){
-        throw new badRequestError('invalid credentials')
+        throw new customAPIError('invalid credentials', StatusCodes.BAD_REQUEST)
     }
 
     const user = await User.findOne({email}).select('+password')
     //console.log(user)
 
     if (!user || !(await user.comparePassword(password, user.password))){
-        throw new badRequestError('invalid credentials')
+        throw new customAPIError('invalid credentials', StatusCodes.BAD_REQUEST)
     }   
 
     createSendToken(user, StatusCodes.OK, res);
+}
+
+const logout = async (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  })
+  res.status(200).json({status: 'success  '})
 }
 
 const protect = async (req, res, next) => {
@@ -77,11 +85,13 @@ const protect = async (req, res, next) => {
     const authHeader = req.headers.authorization
     if(!authHeader || !authHeader.startsWith('Bearer')){
         throw new unauthenticatedError('invalid auth token')
+    } else if (req.cookies.jwt){
+            token = req.cookies.jwt
     }
 
     const token = authHeader.split(' ')[1]
     if(!token){
-        throw new unauthenticatedError('Please login to get access!')
+        throw new customAPIError('Please login to get access!', StatusCodes.UNAUTHORIZED)
     }
 
    //console.log(token)
@@ -91,7 +101,7 @@ const protect = async (req, res, next) => {
    const currentUser = await User.findById(decoded.id);//(decoded.userId)
    if (!currentUser) {
      return next(
-       new badRequestError(
+       new customAPIError(
          'The user belonging to this token does no longer exist.',
          401
        )
@@ -101,7 +111,7 @@ const protect = async (req, res, next) => {
    // 4) Check if user changed password after the token was issued
    if (currentUser.changedPasswordAfter(decoded.iat)) {
      return next(
-       new badRequestError('User recently changed password! Please log in again.', 401)
+       new customAPIError('User recently changed password! Please log in again.', StatusCodes.UNAUTHORIZED)
      );
    }
  
@@ -109,6 +119,38 @@ const protect = async (req, res, next) => {
    req.user = currentUser;
    next();
  };
+
+//only for rendered pages, there will be no errors
+const isLoggedIn = async (req, res, next) => {
+    if (req.cookies.jwt) {
+      try {
+        // 1) verify token
+        const decoded = await promisify(jwt.verify)(
+          req.cookies.jwt,
+          process.env.JWT_SECRET
+        );
+  
+        // 2) Check if user still exists
+        const currentUser = await User.findById(decoded.id);
+        if (!currentUser) {
+          return next();
+        }
+  
+        // 3) Check if user changed password after the token was issued
+        if (currentUser.changedPasswordAfter(decoded.iat)) {
+          return next();
+        }
+  
+        // THERE IS A LOGGED IN USER
+        res.locals.user = currentUser;
+        return next();
+      } catch (err) {
+        return next();
+      }
+    }
+    next();
+  };
+  
  
 
 
@@ -117,7 +159,7 @@ const restrictTo = (...roles) => {
     return (req, res, next) => {
         //roles ['admin', 'lead-guide']
         if(!roles.includes(req.user.role)){
-            throw new customAPIError('you are not permitted to access this route', 403)
+            throw new customAPIError('you are not permitted to access this route', StatusCodes.FORBIDDEN)
         }
         next()
     }
@@ -129,7 +171,7 @@ const forgotPassword = async (req, res, next) => {
     const user = await User.findOne({email: req.body.email});
 
     if(!user){
-        throw new notFoundError('No user found with that email')
+        throw new customAPIError('No user found with that email', StatusCodes.NOT_FOUND)
     }
 
     //2)generate random reset token
@@ -174,7 +216,7 @@ const resetPassword = async (req, res) => {
 
     //2) if token has expired, and there is no user
     if(!user){
-        throw new badRequestError('Token is invalid or has expired')
+        throw new customAPIError('Token is invalid or has expired', StatusCodes.UNAUTHORIZED)
     }
 
 
@@ -217,5 +259,5 @@ const updatePassword = async (req, res) => {
 
 
 module.exports = {
-    signUp, login, protect, restrictTo, forgotPassword, resetPassword, updatePassword 
+    signUp, login, protect, restrictTo, forgotPassword, resetPassword, updatePassword, isLoggedIn, logout
 }
