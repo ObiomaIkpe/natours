@@ -64,6 +64,12 @@ const updateUser = (req,res) => {
     })
 }
 
+const getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
+
+}
+
 const deleteMe = async (req,res) => {
     await User.findByIdAndUpdate(req.user.id, {active: false})
 
@@ -84,7 +90,7 @@ const deleteUser = (req,res) => {
 
 
 module.exports = {
-    createUser, getAllUsers, updateMe, updateUser, deleteUser, getSingleUser, deleteMe
+    createUser, getAllUsers, updateMe, updateUser, deleteUser, getSingleUser, getMe, deleteMe
 }
 
 

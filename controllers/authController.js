@@ -84,7 +84,7 @@ const protect = async (req, res, next) => {
     //get the token || check if the token exits
     const authHeader = req.headers.authorization
     if(!authHeader || !authHeader.startsWith('Bearer')){
-        throw new unauthenticatedError('invalid auth token')
+        throw new customAPIError('invalid auth token', StatusCodes.UNAUTHORIZED)
     } else if (req.cookies.jwt){
             token = req.cookies.jwt
     }
@@ -103,7 +103,7 @@ const protect = async (req, res, next) => {
      return next(
        new customAPIError(
          'The user belonging to this token does no longer exist.',
-         401
+         StatusCodes.UNAUTHORIZED
        )
      );
    }
@@ -166,8 +166,7 @@ const restrictTo = (...roles) => {
 }
 
 const forgotPassword = async (req, res, next) => {
-    //1) get user based on POSTed email
-    
+    //1) get user based on POSTed email.    
     const user = await User.findOne({email: req.body.email});
 
     if(!user){
@@ -204,7 +203,7 @@ catch(err){
     console.log(err)
 } }
 
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
     //1) get user based on the token
     const hashedToken = crypto
     .createHash('sha256')
