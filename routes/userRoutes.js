@@ -15,7 +15,7 @@ router.route('/me').get(authcontroller.protect, userController.getMe, userContro
 router.route('/updateMyPassword').patch(authcontroller.protect,authcontroller.updatePassword);
 router.route('/updateMe').patch(authcontroller.protect, userController.updateMe);
 router.route('/deleteMe').delete(authcontroller.protect, userController.deleteMe);
-router.route('/').get(userController.getAllUsers)
+router.route('/').get(authcontroller.protect, authcontroller.restrictTo('admin'), userController.getAllUsers)
 router.route('/').post(userController.createUser)
 router.route('/:id').get(userController.getSingleUser)
 router.route('/:id').patch(userController.updateUser)
