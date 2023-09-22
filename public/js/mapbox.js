@@ -1,7 +1,5 @@
 console.log('hello from the client side!')
 
-const locations = JSON.parse(document.getElementById('map').dataset.locations)
-
 export const displayMap = (locations) => {
 
 

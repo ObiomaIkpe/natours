@@ -61,12 +61,12 @@ const tourSchema = new mongoose.Schema({
     ],
            
     //   reviews:[
-    //     {
-    //     type: mongoose.Schema.ObjectId,
-    //     ref: "Review",
-    //         //this it how it would have been done wif it was child referencing, in this case, tours referencing reviews. Instead, we implement virtual populate!
-    //   }
-    //  ] , 
+    //      {
+    //      type: mongoose.Schema.ObjectId,
+    //      ref: "Review",
+    //          //this it how it would have been done wif it was child referencing, in this case, tours referencing reviews. Instead, we implement virtual populate!
+    //    }
+    //   ] , 
     
 
     rating:{
@@ -161,13 +161,13 @@ tourSchema.virtual('reviews',   {
 //     next();
 // })
 
-tourSchema.pre('/^find/', function(next){
-    this.populate({
-        path: 'guides',
-select: '-__v -passwordChangedAt'});
+// tourSchema.pre('/^find/', function(next){
+//     this.populate({
+//         path: 'guides',
+// select: '-__v -passwordChangedAt'});
 
-    next();
-})
+//     next();
+// })
 
 tourSchema.pre('save', function(next) {
 this.slug = slugify(this.name, {lower: true});

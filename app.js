@@ -60,6 +60,7 @@ const limiter = rateLimit({
 })
 
 
+
 app.use('/api', limiter);
 
 
@@ -76,7 +77,7 @@ app.all('*', (req, res, next) => {
 
     throw new customAPIError(`cannot find ${req.originalUrl} on this server` )
 
-})
+}) 
 
 
 

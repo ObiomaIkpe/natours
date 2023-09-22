@@ -83,13 +83,14 @@ const logout = async (req, res) => {
 const protect = async (req, res, next) => {
     //get the token || check if the token exits
     const authHeader = req.headers.authorization
-    if(!authHeader || !authHeader.startsWith('Bearer')){
+    let token = authHeader.split(' ')[1]
+    if(!authHeader || !authHeader.startsWith('Bearer ')){
         throw new customAPIError('invalid auth token', StatusCodes.UNAUTHORIZED)
     } else if (req.cookies.jwt){
             token = req.cookies.jwt
     }
 
-    const token = authHeader.split(' ')[1]
+    
     if(!token){
         throw new customAPIError('Please login to get access!', StatusCodes.UNAUTHORIZED)
     }
@@ -139,12 +140,13 @@ const isLoggedIn = async (req, res, next) => {
         // 3) Check if user changed password after the token was issued
         if (currentUser.changedPasswordAfter(decoded.iat)) {
           return next();
-        }
+        } 
   
         // THERE IS A LOGGED IN USER
         res.locals.user = currentUser;
         return next();
-      } catch (err) {
+      } 
+      catch (err) {
         return next();
       }
     }

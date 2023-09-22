@@ -33,7 +33,7 @@ const createTours = async () => {
     try {
         await connectDB(process.env.DATABASE)
         await Tour.create(tours);
-        await User.create(users);
+        await User.create(users, {validateBeforeSave: false});
         await Review.create(reviews);
         console.log('tours have successfully been created!')
     } catch(err){

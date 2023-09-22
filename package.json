@@ -5,9 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "NODE_ENV=development nodemon server.js",
+    "start:dev": "NODE_ENV=development nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
-    "debug": "ndb server.js"
+    "dev": "parcel public/js/index.js",
+    "debug": "ndb server.js",
+    "watch": "parcel watch",
+    "build": "parcel build",
+    "source": "public/js/index.js",
+    "main": "public/js/index.js",
+    "module": "public/js/index.js"
+
   },
   "author": "",
   "license": "ISC",
@@ -40,5 +47,5 @@
   "devDependencies": {
     "morgan": "^1.10.0",
     "nodemon": "^2.0.22"
-  }
+    }
 }

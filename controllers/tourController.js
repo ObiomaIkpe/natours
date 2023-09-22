@@ -42,12 +42,12 @@ const getAllTours = async(req, res)=> {
 
 const getTour = async (req, res) => {    
     // Tour.findOne({ _id: req,params.id})
-        const tour = await Tour.findById(req.params.id)//.populate({
-            //path:'guides', select: '-__v -passwordChangedAt'}); //populate(reviews)
+        const tour = await Tour.findById(req.params.id).populate('reviews')//.populate({
+            //path:'guides', select: '-__v -passwordChangedAt'}); //
         //'id' must match with the variable in the routes
 
     if (!tour){
-        throw new customAPI('no tour found with that ID', StatusCodes.NOT_FOUND)
+        throw new customAPIError('no tour found with that ID', StatusCodes.NOT_FOUND)
     }
 
     res.status(StatusCodes.OK).json({
