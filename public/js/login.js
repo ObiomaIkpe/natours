@@ -28,3 +28,19 @@ try{
 }
 
 
+export const logout =async () => {
+  try{
+  const res = await axios({
+    method: 'GET',
+    url: 'http://localhost:9000/api/v1/users/logout',    
+  }) 
+  if(res.data){
+    showAlert('success','logged in successfully');
+    location.reload(true);
+  }
+  }
+  catch(err){
+    console.log(err.response)
+    showAlert('failed', 'Error logging out, try again!');
+  }
+}

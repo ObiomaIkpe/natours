@@ -6017,7 +6017,7 @@ exports.showAlert = showAlert;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.login = void 0;
+exports.logout = exports.login = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -6089,6 +6089,54 @@ function () {
 }();
 
 exports.login = login;
+
+var logout =
+/*#__PURE__*/
+function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime().mark(function _callee2() {
+    var res;
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _context2.next = 3;
+          return (0, _axios.default)({
+            method: 'GET',
+            url: 'http://localhost:9000/api/v1/users/logout'
+          });
+
+        case 3:
+          res = _context2.sent;
+
+          if (res.data) {
+            (0, _alerts.showAlert)('success', 'logged in successfully');
+            location.reload(true);
+          }
+
+          _context2.next = 11;
+          break;
+
+        case 7:
+          _context2.prev = 7;
+          _context2.t0 = _context2["catch"](0);
+          console.log(_context2.t0.response);
+          (0, _alerts.showAlert)('failed', 'Error logging out, try again!');
+
+        case 11:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[0, 7]]);
+  }));
+
+  return function logout() {
+    return _ref2.apply(this, arguments);
+  };
+}();
+
+exports.logout = logout;
 },{"axios":"../../node_modules/axios/index.js","./alerts":"alerts.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
@@ -6100,7 +6148,8 @@ console.log('hello from parcel!'); //import '@babel/polyfill';
 
 //DOM ELEMENTS
 var mapBox = document.getElementById('map');
-var loginForm = document.querySelector('.form'); //DELEGATION
+var loginForm = document.querySelector('.form');
+var logOutBtn = document.querySelector('.nav__el--logout'); //DELEGATION
 
 if (mapBox) {
   var locations = JSON.parse(mapBox.dataset.locations);
@@ -6115,6 +6164,10 @@ if (loginForm) {
     var password = document.getElementById('password').value;
     (0, _login.login)(email, password);
   });
+}
+
+if (logOutBtn) {
+  logOutBtn.addEventListener('click', _login.logout);
 }
 },{"./mapbox":"mapbox.js","./login":"login.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -6144,7 +6197,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35727" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42665" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
