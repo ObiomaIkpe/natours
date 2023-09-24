@@ -2,8 +2,6 @@ console.log('hello from the client side!')
 
 export const displayMap = (locations) => {
 
-
-
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWlnbzI0NyIsImEiOiJjbG1lNTlleGkxdnJuM2d0ZnhqNnpvZGRtIn0.TlWzNECzx8Yjl6k8TBxlOQ';
 const map = new mapboxgl.Map({
     container: 'map', // container ID

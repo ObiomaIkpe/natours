@@ -21,6 +21,9 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname ,'views'))
 
+// Enable CORS for a specific domain
+ 
+
 app.use(express.static(path.join(__dirname, 'public')))
 
 //app.use(helmet());
@@ -78,8 +81,7 @@ app.all('*', (req, res, next) => {
     throw new customAPIError(`cannot find ${req.originalUrl} on this server` )
 
 }) 
-
-
+ 
 
 app.use (errorHandlerMiddleware);
 
