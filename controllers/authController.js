@@ -82,14 +82,16 @@ const logout = async (req, res) => {
 
 const protect = async (req, res, next) => {
     //get the token || check if the token exits
-    const authHeader = req.headers.authorization
-    let token = authHeader.split(' ')[1]
-    if(!authHeader || !authHeader.startsWith('Bearer ')){
-        throw new customAPIError('invalid auth token', StatusCodes.UNAUTHORIZED)
-    } else if (req.cookies.jwt){
-            token = req.cookies.jwt
-    }
-
+  // 1) Getting token and check of it's there
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
     
     if(!token){
         throw new customAPIError('Please login to get access!', StatusCodes.UNAUTHORIZED)
@@ -118,6 +120,7 @@ const protect = async (req, res, next) => {
  
    // GRANT ACCESS TO PROTECTED ROUTE
    req.user = currentUser;
+   res.locals.user = currentUser;
    next();
  };
 

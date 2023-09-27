@@ -1,0 +1,7 @@
+{
+  "bundlerOptions": {
+    "external": {
+      "sharp": "sharp"
+    }
+  }
+}
